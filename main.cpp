@@ -55,7 +55,7 @@ void moveInDirection(const sf::Time &elapsed, const sf::Keyboard::Key &key, sf::
 int main()
 {
     // create the window
-    sf::RenderWindow window(sf::VideoMode(1000, 800), "My window");
+    sf::RenderWindow window(sf::VideoMode(800, 800), "My window");
 
     // ------------Load Textures------------
     sf::Texture texture_grass;
@@ -77,13 +77,14 @@ int main()
     grass.setTexture(texture_grass);
     grass.setTextureRect(sf::IntRect(0, 0, window.getSize().x, window.getSize().y));
 
-    // ------------Walls------------
+    // ------------Walls and Borders------------
     texture_wall.setRepeated(true);
     sf::Sprite wall;
     wall.setTexture(texture_wall);
 
     std::vector<sf::Sprite> walls; // Vector for walls
 
+    // ------------Borders------------
     // Left wall
     wall.setTextureRect(sf::IntRect(0, 0, 50, window.getSize().y - 125)); // Leave space for starting position
     wall.setPosition(0.0, 125.0); // Starting position
@@ -93,12 +94,95 @@ int main()
     wall.setPosition(0.0, 0.0);
     walls.emplace_back(wall);
     // Right wall
-    wall.setTextureRect(sf::IntRect(0, 0, 50, window.getSize().y));
+    wall.setTextureRect(sf::IntRect(0, 0, 50, window.getSize().y - 125)); // Leave space for ending position
     wall.setPosition(window.getSize().x - 50, 0.0);
     walls.emplace_back(wall);
     // Bottom wall
     wall.setTextureRect(sf::IntRect(0, 0, window.getSize().x, 50));
     wall.setPosition(0.0, window.getSize().y - 50);
+    walls.emplace_back(wall);
+    // ------------Maze Walls------------
+    // x axis - 100 including width of wall - 75
+    // y axis - 100 including width of wall - 75
+    // Vertical Walls
+    //1
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(125.0, 450.0);
+    walls.emplace_back(wall);
+    //2
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(225.0, 50.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(225.0, 550.0);
+    walls.emplace_back(wall);
+    //3
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(325.0, 150.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(325.0, 450.0);
+    walls.emplace_back(wall);
+    //4
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(425.0, 50.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
+    wall.setPosition(425.0, 350.0);
+    walls.emplace_back(wall);
+    //5
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 100));
+    wall.setPosition(525.0, 50.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 100));
+    wall.setPosition(525.0, 250.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 100));
+    wall.setPosition(525.0, 550.0);
+    walls.emplace_back(wall);
+    //6
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 100));
+    wall.setPosition(625.0, 350.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 25, 100));
+    wall.setPosition(625.0, 650.0);
+    walls.emplace_back(wall);
+    // Horizontal Walls
+    //1
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(50.0, 150.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(550.0, 125.0);
+    walls.emplace_back(wall);
+    //2
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(150.0, 250.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(650.0, 250.0);
+    walls.emplace_back(wall);
+    //3
+    wall.setTextureRect(sf::IntRect(0, 0, 500, 25));
+    wall.setPosition(50.0, 350.0);
+    walls.emplace_back(wall);
+    //4
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(250.0, 450.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(550.0, 450.0);
+    walls.emplace_back(wall);
+    //5
+    wall.setTextureRect(sf::IntRect(0, 0, 100, 25));
+    wall.setPosition(150.0, 550.0);
+    walls.emplace_back(wall);
+    wall.setTextureRect(sf::IntRect(0, 0, 200, 25));
+    wall.setPosition(550.0, 550.0);
+    walls.emplace_back(wall);
+    //6
+    wall.setTextureRect(sf::IntRect(0, 0, 200, 25));
+    wall.setPosition(350.0, 637.0);
     walls.emplace_back(wall);
 
     // ------------Character------------
