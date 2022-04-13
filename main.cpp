@@ -4,58 +4,91 @@
 #include <iostream>
 #include <vector>
 
-void exact_bound(sf::Sprite &guy, int right, int bottom)
-{
-    sf::FloatRect bounds = guy.getGlobalBounds();
-    if(bounds.top <= 0.0)
-    {
-        guy.setPosition(bounds.left, 0.0);
-    }
-    if(bounds.left <= 0.0)
-    {
-        guy.setPosition(0.0, bounds.top);
-    }
-    if(bounds.left >= right - bounds.width)
-    {
-        guy.setPosition(right - bounds.width, bounds.top);
-    }
-    if(bounds.top >= bottom - bounds.height)
-    {
-        guy.setPosition(bounds.left, bottom - bounds.height);
-    }
-}
-
-void moveInDirection(const sf::Time &elapsed, const sf::Keyboard::Key &key, sf::Sprite &guy, sf::RenderWindow &window)
+void moveInDirection(sf::Time &elapsed, const sf::Keyboard::Key &key, sf::Sprite &guy, sf::RenderWindow &window, std::vector<sf::Sprite> &walls)
 {
     // set speed
-    int speed_x = 250;
-    int speed_y = 250;
+    int speed_x = 10;
+    int speed_y = 10;
     int right = window.getSize().x;
     int bottom = window.getSize().y;
-    sf::FloatRect bounds = guy.getGlobalBounds();
-    if(key == sf::Keyboard::Up && !(bounds.top <= 0.0))
+
+    for(auto &wall : walls)
     {
-        guy.move(0, -speed_y * elapsed.asSeconds());
+        // Collision detection
+        sf::FloatRect guybounds = guy.getGlobalBounds();
+        sf::FloatRect wallbounds = wall.getGlobalBounds();
+        // The 5 number is added/subtracted because when collision happens coordinates overlap
+        if(guy.getGlobalBounds().intersects(wallbounds)) // When collision happens
+        {
+//            std::cout << "Collision!--";
+            // Top Collision - Top of guy hits bottom of wall
+            if(guybounds.top > wallbounds.top + wallbounds.height - 5 // top of guy is touching bottom of wall (not
+                && guybounds.left + guybounds.width > wallbounds.left // Guy is not on left side of wall
+                    && guybounds.left < wallbounds.left + wallbounds.width) // Guy is not on right side of wall
+            {
+//                std::cout << "Top Collision!--";
+                guy.setPosition(guy.getPosition().x, wallbounds.top + wallbounds.height); // Position just below wall
+                break;
+            }
+            // Bottom Collision
+            else if(guybounds.top < wallbounds.top - guybounds.height + 5 // bottom of guy is touching top of wall
+                    && guybounds.left > wallbounds.left - guybounds.width
+                    && guybounds.left < wallbounds.left + wallbounds.width)
+
+            {
+//                std::cout << "Bottom Collision!--";
+                guy.setPosition(guy.getPosition().x, wallbounds.top - guybounds.height); // Position just above wall
+                break;
+            }
+            // Right Collision
+            else if(guybounds.left < wallbounds.left - guybounds.width + 5
+                    && guybounds.top > wallbounds.top - guybounds.height
+                    && guybounds.top < wallbounds.top + wallbounds.height)
+            {
+//                std::cout << "Right Collision!--";
+                if(guybounds.left + guybounds.width - wallbounds.left > 4) // Highest overlap recorded 4.96503
+                    std::cout << guybounds.left + guybounds.width - wallbounds.left << "----";
+                guy.setPosition(wallbounds.left - guybounds.width, guy.getPosition().y); // Position just left of wall
+                break;
+            }
+            // Left Collision
+            else if(guybounds.left > wallbounds.left + wallbounds.width - 5
+                    && guybounds.top > wallbounds.top - guybounds.height
+                    && guybounds.top < wallbounds.top + wallbounds.height)
+            {
+//                std::cout << "Left Collision!--";
+                guy.setPosition(wallbounds.left + wallbounds.width, guy.getPosition().y); // Position just right of wall
+                break;
+            }
+        }
+        else // Movement without collisions
+        {
+            if(key == sf::Keyboard::Up && !(guybounds.top <= 0.0))
+            {
+                guy.move(0, -speed_y * elapsed.asSeconds());
+//                std::cout << "Here\n";
+            }
+            else if(key == sf::Keyboard::Right && !(guybounds.left >= right - guybounds.width))
+            {
+                guy.move(speed_x * elapsed.asSeconds(), 0);
+            }
+            else if(key == sf::Keyboard::Down && !(guybounds.top >= bottom - guybounds.height) && !(guybounds.top >= bottom - guybounds.height))
+            {
+                guy.move(0, speed_y * elapsed.asSeconds());
+            }
+            else if(key == sf::Keyboard::Left && !(guybounds.left <= 0.0))
+            {
+                guy.move(-speed_x * elapsed.asSeconds(), 0);
+            }
+        }
     }
-    else if(key == sf::Keyboard::Right && !(bounds.left >= right - bounds.width))
-    {
-        guy.move(speed_x * elapsed.asSeconds(), 0);
-    }
-    else if(key == sf::Keyboard::Down && !(bounds.top >= bottom - bounds.height))
-    {
-        guy.move(0, speed_y * elapsed.asSeconds());
-    }
-    else if(key == sf::Keyboard::Left && !(bounds.left <= 0.0))
-    {
-        guy.move(-speed_x * elapsed.asSeconds(), 0);
-    }
-    exact_bound(guy, right, bottom);
 }
 
 int main()
 {
     // create the window
     sf::RenderWindow window(sf::VideoMode(800, 800), "My window");
+//    window.setFramerateLimit(50); // Enabling framerate makes collision detection buggy
 
     // ------------Load Textures------------
     sf::Texture texture_grass;
@@ -104,6 +137,16 @@ int main()
     // ------------Maze Walls------------
     // x axis - 100 including width of wall - 75
     // y axis - 100 including width of wall - 75
+
+    // TEST WALLS
+
+//    wall.setTextureRect(sf::IntRect(0, 0, 50, 200));
+//    wall.setPosition(300.0, 400.0);
+//    walls.emplace_back(wall);
+//    wall.setTextureRect(sf::IntRect(0, 0, 200, 50));
+//    wall.setPosition(200.0, 200.0);
+//    walls.emplace_back(wall);
+
     // Vertical Walls
     //1
     wall.setTextureRect(sf::IntRect(0, 0, 25, 200));
@@ -196,24 +239,24 @@ int main()
     // run the program as long as the window is open
     while (window.isOpen())
     {
-        sf::Time elapsed = clock.restart();
+        sf::Time elapsed = clock.restart(); // Delta time - Implemented so that units moved per second doesn't depend on frame rate.
 
         // ------------Move Character------------
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
         {
-            moveInDirection(elapsed, sf::Keyboard::Up, guy, window);
+            moveInDirection(elapsed, sf::Keyboard::Up, guy, window, walls);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
         {
-            moveInDirection(elapsed, sf::Keyboard::Down, guy, window);
+            moveInDirection(elapsed, sf::Keyboard::Down, guy, window, walls);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
-            moveInDirection(elapsed, sf::Keyboard::Left, guy, window);
+            moveInDirection(elapsed, sf::Keyboard::Left, guy, window, walls);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
         {
-            moveInDirection(elapsed, sf::Keyboard::Right, guy, window);
+            moveInDirection(elapsed, sf::Keyboard::Right, guy, window, walls);
         }
 
         // ------------Quit - Press Q------------
