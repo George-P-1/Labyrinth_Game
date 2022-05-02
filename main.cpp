@@ -233,6 +233,14 @@ int main()
     guy.setTexture(texture_guy);
     guy.setPosition(0.0, 50.0); // Start at top-left
 
+    // -----------You Win Screen--------
+    sf::Texture win_texture;
+    if(!win_texture.loadFromFile("youwin.jpg")) std::cerr << "Could not load you win texture" << std::endl;
+    sf::Sprite win_background;
+    win_background.setTexture(win_texture);
+    win_background.setPosition(0, 0);
+    bool youwin = false;
+
     // Start clock
     sf::Clock clock;
 
@@ -259,6 +267,12 @@ int main()
             moveInDirection(elapsed, sf::Keyboard::Right, guy, window, walls);
         }
 
+        // ------------------- You Win-------------------
+        if(guy.getGlobalBounds().left > window.getSize().x - 50)
+        {
+            youwin = true;
+        }
+
         // ------------Quit - Press Q------------
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
         {
@@ -283,6 +297,10 @@ int main()
         }
         // Character
         window.draw(guy);
+        if(youwin) // If player won
+        {
+            window.draw(win_background);
+        }
 
         // end the current frame
         window.display();
